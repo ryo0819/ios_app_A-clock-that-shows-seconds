@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct ContentView: View {
+let timeZones = ["Asia/Tokyo", "America/New_York", "Europe/London", "Europe/Vienna"]
+@State private var selectedZone = "Asia/Tokyo"
+
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1.0)) { context in
             ZStack {
@@ -8,30 +11,37 @@ struct ContentView: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 20) {
-                    Text(dateAndZoneString(date: context.date)).font(.system(size: 25, design: .monospaced))
+                    Picker("Select Country", selection: $selectedZone) {
+                        ForEach(timeZones, id: \.self) { zone in
+                            Text(zone).tag(zone)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(.white)
+
+                    Text(dateAndZoneString(date: context.date, identifier: selectedZone))
+                        .font(.system(size: 25, design: .monospaced))
                         .foregroundColor(.gray)
 
-                    ZStack {
-                        Text(timeString(date: context.date))
-                            .font(.system(size: 60, weight: .bold, design: .monospaced))
-                            .foregroundColor(.green)
-                    }
+                    Text(timeString(date: context.date, identifier: selectedZone))
+                        .font(.system(size: 60, weight: .bold, design: .monospaced))
+                        .foregroundColor(.green)
                 }
             }
         }
     }
 
-    func dateAndZoneString(date: Date) -> String {
+    func dateAndZoneString(date: Date, identifier: String) -> String {
         let dateformatter = DateFormatter()
-        dateformatter.dateFormat = "yyyy-MM-dd (zzz)"
-        dateformatter.locale = Locale(identifier: "ja_JP")
+        dateformatter.dateFormat = "yyyy-MM-dd (EEEE)"
+        dateformatter.timeZone = TimeZone(identifier: identifier)
         return dateformatter.string(from: date)
     }
 
-    func timeString(date: Date) -> String {
+    func timeString(date: Date, identifier: String) -> String {
         let timeformatter = DateFormatter()
         timeformatter.dateFormat = "HH:mm:ss"
-        timeformatter.locale = Locale(identifier: "ja_JP")
+        timeformatter.timeZone = TimeZone(identifier: identifier)
         return timeformatter.string(from: date)
     }
 }
